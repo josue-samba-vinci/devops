@@ -29,11 +29,7 @@ router.post('/login', (req, res, next) => {
         else {
             if (bcrypt.compareSync(req.body.userPassword, userFound.password)) {
                 manageCorrectPassword(req);
-                if (userFound.admin) {
-                    manageIsAdmin(req, res);
-                } else {
-                    manageIsMember(req, res);
-                }
+                manageisAdminOrisMember(userFound, req, res);
             }
             else {
                 manageWrongPassword(req, res);
@@ -89,6 +85,14 @@ router.post('/add', (req, res, next) => {
 });
 
 module.exports = router;
+
+function manageisAdminOrisMember(userFound, req, res) {
+    if (userFound.admin) {
+        manageIsAdmin(req, res);
+    } else {
+        manageIsMember(req, res);
+    }
+}
 
 function manageDeactivatedAccount(req, res) {
     req.session.errors = "Compte désactivé";
