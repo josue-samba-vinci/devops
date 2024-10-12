@@ -24,26 +24,19 @@ router.post('/login', (req, res, next) => {
     console.log("User found" + JSON.stringify(userFound));
     if (userFound) {
         if (userFound.active == false) {
-            req.session.errors = "Compte désactivé";
-            res.redirect('/users');
+            manageDeactivatedAccount(req, res);
         }
         else {
             if (bcrypt.compareSync(req.body.userPassword, userFound.password)) {
-                console.log("password correct");
-                req.session.login = req.body.userLogin;
-                req.session.connected = true;
+                manageCorrectPassword(req);
                 if (userFound.admin) {
-                    req.session.admin = true;
-                    res.redirect('/admin');
+                    manageIsAdmin(req, res);
                 } else {
-                    req.session.admin = false;
-                    res.redirect('/members');
+                    manageIsMember(req, res);
                 }
             }
             else {
-                console.log("bad password");
-                req.session.errors = "Mot de passe incorrect";
-                res.redirect('/users');
+                manageWrongPassword(req, res);
             }
         }
     }
@@ -96,3 +89,30 @@ router.post('/add', (req, res, next) => {
 });
 
 module.exports = router;
+
+function manageDeactivatedAccount(req, res) {
+    req.session.errors = "Compte désactivé";
+    res.redirect('/users');
+}
+
+function manageIsMember(req, res) {
+    req.session.admin = false;
+    res.redirect('/members');
+}
+
+function manageIsAdmin(req, res) {
+    req.session.admin = true;
+    res.redirect('/admin');
+}
+
+function manageCorrectPassword(req) {
+    console.log("password correct");
+    req.session.login = req.body.userLogin;
+    req.session.connected = true;
+}
+
+function manageWrongPassword(req, res) {
+    console.log("bad password");
+    req.session.errors = "Mot de passe incorrect";
+    res.redirect('/users');
+}
